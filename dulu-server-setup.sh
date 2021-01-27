@@ -184,7 +184,7 @@ cd $DULU_HOME/dulu
 
 # Ensure that repo is up to date with upstream:
 #   https://github.com/silcam/dulu.git
-git merge upstream/m
+git merge upstream/master
 
 # Create database.yml file from the sample.
 db_config=$DULU_HOME/dulu/config/database.yml
