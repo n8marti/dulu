@@ -179,7 +179,7 @@ if [[ ! -d $DULU_HOME/dulu ]]; then
     fi
 fi
 
-# Must be in dulu directory for rbenv commands to work.
+# Must be in dulu directory for git and rbenv commands to work.
 cd $DULU_HOME/dulu
 
 # Ensure that repo is up to date with upstream.
@@ -269,8 +269,10 @@ end
 "
 omniauth_file="$DULU_HOME/dulu/config/initializers/omniauth.rb"
 if [[ ! -e $omniauth_file ]]; then
-    echo "You need to create $omniauth_file with the following contents:"
+    echo "You need to create"
+    echo "$omniauth_file with the following contents:"
     echo "$contents"
+    echo "Then re-run the script."
     exit 1
 fi
 
