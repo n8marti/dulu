@@ -182,8 +182,11 @@ fi
 # Must be in dulu directory for rbenv commands to work.
 cd $DULU_HOME/dulu
 
-# Ensure that repo is up to date with upstream:
-#   https://github.com/silcam/dulu.git
+# Ensure that repo is up to date with upstream.
+upstream='https://github.com/silcam/dulu.git'
+if [[ ! $(git remove -v | grep silcam) ]]; then
+    git remote add upstream "$upstream"
+fi
 git merge upstream/master
 
 # Create database.yml file from the sample.
