@@ -17,7 +17,7 @@ RUBY_VER=2.5.0
 NODE_VER=v12
 
 
-# This requires Ubuntu 18.04 server as of 2021-01-18.
+# This assumes Ubuntu 18.04 server as of 2021-01-18.
 echo "Ensuring compatible Ubuntu version..."
 version_id=$(grep VERSION_ID /etc/os-release | awk -F'=' '{print $2}')
 if [[ $version_id != '"18.04"' ]]; then
