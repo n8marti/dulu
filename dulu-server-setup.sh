@@ -2,9 +2,10 @@
 
 # Automate the install, configuration, and updating of a Dulu server instance.
 if [[ $1 == 'help' ]] || [[ $1 == '--help' ]] || [[ $1 == '-h' ]]; then
-    echo "Automate the install, configuration, and updating of a Dulu server instance."
-    echo "Run the command with no arguments to configure our update the dulu server."
-    echo "Use the 'db-new' argument to recreate the database from an updated seed."
+    echo -e "Automate the install, configuration, and updating of a Dulu server instance.\n"
+    echo -e "Run the script with no arguments to configure or update the dulu server."
+    echo "Use the 'db-new' argument to recreate the database from an updated seed, e.g.:"
+    echo "${0} db-new"
     exit 0
 fi
 
