@@ -288,7 +288,9 @@ if [[ $1 == 'db-new' ]]; then
     rails db:drop
 fi
 
-if [[ ! $(psql --list | grep dulu_dev >/dev/null 2>&1) ]]; then
+# Ensure the database exists.
+db_check=$(psql --list | grep dulu_dev 2>/dev/null)
+if [[ ! $db_check ]]; then
     echo "Creating, loading, and seeding new database..."
     # Create databases dulu_dev and dulu_test. See database.yml for the username and password to use.
     rails db:create
