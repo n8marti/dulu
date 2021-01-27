@@ -186,6 +186,8 @@ cd $DULU_HOME/dulu
 upstream='https://github.com/silcam/dulu.git'
 if [[ ! $(git remote -v | grep silcam) ]]; then
     git remote add upstream "$upstream"
+    git fetch upstream
+    git checkout master
 fi
 git merge upstream/master
 
