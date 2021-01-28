@@ -42,31 +42,126 @@
 # ------------------------------------------------------------------------------
 
 import csv
+import datetime
+import re
+import sys
 
 from pathlib import Path
 
-input_file = Path.home() / 'Téléchargements' / 'CAG_Lgs_Info.csv'
 
-lg_data = []
-with open(input_file, newline='') as csvfile:
-    csv_dict = csv.DictReader(csvfile, delimiter=',', quotechar='"')
-    id = 1
-    for row in csv_dict:
-        if row["Language Name"]:
-            code = row["ISO"] if row["ISO"] else None
-            notes = row["Notes"] if row["Notes"] else None
-            pop = row["No. of Speakers"] if row["No. of Speakers"] else None
-            classif = row["Lg. Family"] if row["Lg. Family"] else None
-            lg_dict = {
-                "id": id,
-                "name": row["Language Name"],
-                "code": code,
-                "notes": notes,
-                "population": pop,
-                "classification": classif,
-            }
-            lg_data.append(lg_dict)
-            id += 1
+def fix_dirty_pop(dirty_pop):
+    # Match all entries that are not a string of digits or NULL.
+    pop = dirty_pop.strip()
+    m_nondigits = re.match('.*([^0-9NUL]+).*', dirty_pop)
+    if m_nondigits:
+        # Filter out non-digit characters using regex.
+        string = m_nondigits.group().strip()
+        m_year = re.match('^(.*)\([0-9]{4}\)$', string)
+        if m_year:
+            string = m_year.group(1).strip()
+        m_unit = re.match('^([0-9.]+)([M+]+)$', string)
+        if m_unit:
+            num = m_unit.group(1)
+            unit = m_unit.group(2)
+            if unit[0] == 'M':
+                string = str(int(float(num) * 1000000)).strip()
+            else:
+                string = str(int(num)).strip()
+        m_sep = re.match('^[0-9]+,[0-9]+.*$', string)
+        if m_sep:
+            string = m_sep.group()
+            m_car = re.match('.*\(([0-9]+,[0-9]+) in CAR\)', string)
+            if m_car:
+                string = m_car.group(1)
+            string = string.replace(',', '')
+        m_nondigits = re.match('^[^0-9NU]{2}.*$', string)
+        if m_nondigits:
+            string = "NULL"
+        pop = string
+    return pop
 
-for item in lg_data:
-    print(item)
+def get_lg_data(infile):
+    timestamp = f"'{get_timestamp()}'"
+    lg_data = []
+    with open(infile, newline='') as csvfile:
+        csv_dict = csv.DictReader(csvfile, delimiter=',', quotechar='"')
+        id = 1
+        for row in csv_dict:
+            if row["Language Name"]:
+                code = f"'{row['ISO']}'" if row["ISO"] else "NULL"
+                notes = f"'{row['Notes']}'" if row["Notes"] else "NULL"
+                pop = fix_dirty_pop(row["No. of Speakers"]) if row["No. of Speakers"] else "NULL"
+                classif = f"'{row['Lg. Family']}'" if row["Lg. Family"] else "NULL"
+                lg_dict = {
+                    "id": str(id),
+                    "nm": f"'{row['Language Name']}'",
+                    "cag": "NULL",
+                    "cod": code,
+                    "lsi": "NULL",
+                    "not": notes,
+                    "coi": "540",
+                    "ilg": "NULL",
+                    "pop": pop,
+                    "pde": "NULL",
+                    "cla": classif,
+                    "cri": "NULL",
+                    "cat": timestamp,
+                    "uat": timestamp,
+                    "anm": "NULL",
+                    "pai": "NULL",
+                    "cli": "NULL",
+                    "rid": "NULL",
+                    "pri": "NULL",
+                }
+                lg_data.append(lg_dict)
+                id += 1
+            else:
+                break
+    return lg_data
+
+def get_timestamp():
+    # Has this format:
+    #   2017-05-04 10:15:19.610103
+    fmt = '%Y-%m-%d %H:%M:%S.%f'
+    now = datetime.datetime.now()
+    timestamp = now.strftime(fmt)
+    return timestamp
+
+def get_db_line(dbi):
+    init = "INSERT INTO languages VALUES"
+    items = [
+        dbi["id"],
+        dbi['nm'],
+        dbi['cag'],
+        dbi["cod"],
+        dbi["lsi"],
+        dbi["not"],
+        dbi["coi"],
+        dbi["ilg"],
+        dbi["pop"],
+        dbi["pde"],
+        dbi["cla"],
+        dbi["cri"],
+        dbi["cat"],
+        dbi["uat"],
+        dbi["anm"],
+        dbi["pai"],
+        dbi["cli"],
+        dbi["rid"],
+        dbi["pri"],
+    ]
+    db_line = f"{init} ({', '.join(items)});\n"
+    return db_line
+
+def create_file(lg_data, file):
+    if file.exists():
+        file.unlink()
+    with open(file, 'a') as f:
+        for item in lg_data:
+            db_line = get_db_line(item)
+            f.write(db_line)
+
+input_file = Path.home() / "Téléchargements" / "CAG_Lgs_Info.csv"
+output_file = Path(sys.argv[0]).parents[0].resolve() / "db" / "seeds" / "languages"
+lg_data = get_lg_data(input_file)
+create_file(lg_data, output_file)
