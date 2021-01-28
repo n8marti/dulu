@@ -11,6 +11,11 @@ else
     exit 1
 fi
 
+name="dulu"
+if [[ $(echo $db_to_restore | awk -F'_' '{print $2}') == 'dev' ]]; then
+    name="dulu_dev"
+fi
+
 if [[ $db_to_restore ]]; then
-    zcat $db_to_restore | sudo -u dulu pg_restore --dbname="dulu"
+    zcat $db_to_restore | sudo -u dulu psql --dbname="$name" --username="dulu"
 fi
