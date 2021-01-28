@@ -98,7 +98,7 @@ def get_lg_data(infile):
                     "cag": "NULL",
                     "cod": code,
                     "lsi": "NULL",
-                    "not": notes,
+                    "not": notes.replace("'", ''),
                     "coi": "540",
                     "ilg": "NULL",
                     "pop": pop,
