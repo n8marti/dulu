@@ -16,7 +16,7 @@
 # name                   | character varying           |           |          | A   "Language Name"
 # category               | character varying           |           |          |
 # code                   | character varying           |           |          | B   "ISO"
-# language_status_id     | integer                     |           |          |
+# language_status_id     | integer                     |           |          | P   "EGIDS"
 # notes                  | text                        |           |          | AV  "Notes"
 # country_id             | integer                     |           |          |
 # international_language | character varying           |           |          |
@@ -91,6 +91,7 @@ def get_lg_data(infile):
                 row["Language Name"] = row['Language Name'].replace("'", "’")
                 name = f"'{row['Language Name']}'"
                 code = f"'{row['ISO']}'" if row["ISO"] else "NULL"
+                lsi = f"'{get_lg_status_id(row['EGIDS'])}'" if row['EGIDS'] else "NULL"
                 if row["Notes"]:
                     row["Notes"] = row["Notes"].replace("'", "’")
                 notes = f"'{row['Notes']}'" if row["Notes"] else "NULL"
@@ -103,7 +104,7 @@ def get_lg_data(infile):
                     "nm": name,
                     "cag": "NULL",
                     "cod": code,
-                    "lsi": "NULL",
+                    "lsi": lsi,
                     "not": notes,
                     "coi": "540",
                     "ilg": "NULL",
@@ -158,6 +159,29 @@ def get_db_line(dbi):
     ]
     db_line = f"{init} ({', '.join(items)});\n"
     return db_line
+
+def get_lg_status_id(egids_text):
+    lsi_dict = {
+        1: '0',
+        2: '1',
+        3: '2',
+        4: '3',
+        5: '4',
+        6: '5',
+        7: '5',
+        8: '6a',
+        9: '6b',
+        10: '7',
+        11: '8a',
+        12: '8b',
+        13: '9',
+        14: '9',
+        15: '9',
+        16: '10',
+    }
+    for k, v in lsi_dict.items():
+        if egids_text.split()[0] == v:
+            return k
 
 def create_file(lg_data, file):
     if file.exists():
