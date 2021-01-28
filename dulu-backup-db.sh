@@ -7,4 +7,4 @@ if [[ $1 == 'dulu_dev' ]]; then
     name="$1"
 fi
 outfile="${backup_dir}/${name}_$(date -I).sql.gz"
-sudo -u dulu pg_dump --file="$outfile" --compress=5 --dbname="dulu"
+sudo -u dulu pg_dump --file="$outfile" --compress=5 --dbname="$name"
