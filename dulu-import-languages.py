@@ -89,6 +89,8 @@ def get_lg_data(infile):
         for row in csv_dict:
             if row["Language Name"]:
                 code = f"'{row['ISO']}'" if row["ISO"] else "NULL"
+                if row["Notes"]:
+                    row["Notes"] = row["Notes"].replace("'", "")
                 notes = f"'{row['Notes']}'" if row["Notes"] else "NULL"
                 pop = fix_dirty_pop(row["No. of Speakers"]) if row["No. of Speakers"] else "NULL"
                 classif = f"'{row['Lg. Family']}'" if row["Lg. Family"] else "NULL"
@@ -98,7 +100,7 @@ def get_lg_data(infile):
                     "cag": "NULL",
                     "cod": code,
                     "lsi": "NULL",
-                    "not": notes.replace("'", ''),
+                    "not": notes,
                     "coi": "540",
                     "ilg": "NULL",
                     "pop": pop,
