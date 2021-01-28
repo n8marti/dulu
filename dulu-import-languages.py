@@ -95,6 +95,8 @@ def get_lg_data(infile):
                     row["Notes"] = row["Notes"].replace("'", "’")
                 notes = f"'{row['Notes']}'" if row["Notes"] else "NULL"
                 pop = fix_dirty_pop(row["No. of Speakers"]) if row["No. of Speakers"] else "NULL"
+                if row["Lg. Family"]:
+                    row["Lg. Family"] = row["Lg. Family"].replace("'", "’")
                 classif = f"'{row['Lg. Family']}'" if row["Lg. Family"] else "NULL"
                 lg_dict = {
                     "id": str(id),
