@@ -303,5 +303,5 @@ if [[ ! $db_check ]]; then
 fi
 
 # Start the server.
-# TODO: How to make this happen automatically on boot?
-foreman start
+echo "Setup complete. Start dev server with:"
+echo "\$ foreman start"
