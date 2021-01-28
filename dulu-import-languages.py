@@ -88,15 +88,17 @@ def get_lg_data(infile):
         id = 1
         for row in csv_dict:
             if row["Language Name"]:
+                row["Language Name"] = row['Language Name'].replace("'", "’")
+                name = f"'{row['Language Name']}'"
                 code = f"'{row['ISO']}'" if row["ISO"] else "NULL"
                 if row["Notes"]:
-                    row["Notes"] = row["Notes"].replace("'", "")
+                    row["Notes"] = row["Notes"].replace("'", "’")
                 notes = f"'{row['Notes']}'" if row["Notes"] else "NULL"
                 pop = fix_dirty_pop(row["No. of Speakers"]) if row["No. of Speakers"] else "NULL"
                 classif = f"'{row['Lg. Family']}'" if row["Lg. Family"] else "NULL"
                 lg_dict = {
                     "id": str(id),
-                    "nm": f"'{row['Language Name']}'",
+                    "nm": name,
                     "cag": "NULL",
                     "cod": code,
                     "lsi": "NULL",
