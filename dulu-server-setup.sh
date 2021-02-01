@@ -149,6 +149,7 @@ fi
 # Ensure changes in current shell.
 if [[ ! $(which rbenv) ]]; then
     . $dulu_bashrc
+    rbenv init -
 fi
 
 # Ensure installation of the ruby-build plugin.
@@ -164,7 +165,7 @@ fi
 # Ensure installation of the bundler plugin.
 bundler_plugin_dir=$DULU_HOME/.rbenv/plugins/bundler
 if [[ ! -d $bundler_plugin_dir ]]; then
-    git clone https://github.com/carsomyr/rbenv-bundler.git $DULU_HOME/.rbenv/plugins/bundler
+    git clone https://github.com/carsomyr/rbenv-bundler.git $bundler_plugin_dir
     if [[ $? -ne 0 ]]; then
         echo "Error: Failed to clone bundler repo. Check the connection and try again."
         exit 1
@@ -173,7 +174,7 @@ fi
 
 # Ensure the Dulu repo and cd into it.
 if [[ ! -d $DULU_HOME/dulu ]]; then
-    git clone https://github.com/silcam/dulu.git $DULU_HOME/dulu
+    git clone https://github.com/n8marti/dulu.git $DULU_HOME/dulu
     if [[ ! $? -eq 0 ]]; then
         echo "Error: Failed to clone Dulu repo. Check the connection and try again."
         exit 1
