@@ -183,19 +183,23 @@ fi
 
 # Must be in dulu directory for git and rbenv commands to work.
 cd $DULU_HOME/dulu
+echo "Now working in $PWD."
 
 # Ensure that repo is up to date with upstream.
 upstream='https://github.com/silcam/dulu.git'
 if [[ ! $(git remote -v | grep silcam) ]]; then
+    echo "Adding upstream branch silcam/dulu..."
     git remote add upstream "$upstream"
     git fetch upstream
     git checkout master
 fi
+echo "Updating from upstream branch silcam/dulu..."
 git merge upstream/master
 
 # Create database.yml file from the sample.
 db_config=$DULU_HOME/dulu/config/database.yml
 if [[ ! -e $db_config ]]; then
+    echo "Creating database.yml from database_sample..."
     cp $DULU_HOME/dulu/config/{database_sample.yml,database.yml}
 fi
 
@@ -204,23 +208,25 @@ if [[ ! -d /home/dulu/.rbenv/versions/$RUBY_VER ]]; then
     echo "Installing Ruby $RUBY_VER..."
     rbenv install $RUBY_VER
     rbenv rehash
-    echo -e "\t... Ruby installed."
 fi
 
 # Ensure correct version is used by the environment.
 current_ver=$(rbenv version | awk '{print $1}')
 if [[ $current_ver != $RUBY_VER ]]; then
+    echo "Setting local Ruby version to $RUBY_VER..."
     rbenv local $RUBY_VER
+    rebenv rehash
 fi
 
 # Ensure installation of bundler.
 #   Get bundler version.
 bundler_ver=$(grep -A1 'BUNDLED WITH' $DULU_HOME/dulu/Gemfile.lock | tail -n1 | tr -d ' ')
-if [[ ! $(gem list -i '^bundler') ]]; then
+gem list -i '^bundler' >/dev/null 2>&1
+bundler_status=$?
+if [[ ! $bundler_status ]]; then
     echo "Installing bundler (v$bundler_ver)..."
     gem install bundler -v $bundler_ver
     rbenv rehash
-    echo -e "\t... bundler installed."
 fi
 
 # Install the necessary gems.
@@ -228,15 +234,15 @@ if [[ ! $(bundle check) ]]; then
     echo "Installing gems..."
     bundle install
     rbenv rehash
-    echo -e "\t... gems installed."
 fi
 
 # Run yarn install.
+echo "Ensuring installation of yarn..."
 yarn --silent install
 
 # Ensure the secrets.yml file.
 if [[ ! -e $DULU_HOME/dulu/config/secrets.yml ]]; then
-    echo "Generating a secrets.yml file."
+    echo "Generating a secrets.yml file..."
 
     # Random Keys
     KEY_DEV=$(./bin/rake secret)
@@ -280,6 +286,7 @@ fi
 
 # Ensure postgres superuser.
 if [[ ! $(sudo -u postgres psql --command="SELECT 1 FROM pg_roles WHERE rolname='dulu'" 2>/dev/null) ]]; then
+    echo "Creating postgres superuser..."
     sudo -u postgres psql --command="CREATE ROLE dulu CREATEDB LOGIN SUPERUSER PASSWORD 'dulu';"
 fi
 
