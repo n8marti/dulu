@@ -288,7 +288,8 @@ if [[ ! -e $omniauth_file ]]; then
 fi
 
 # Ensure postgres superuser.
-dulu_user_check=$(sudo -u postgres psql --command="SELECT 1 FROM pg_roles WHERE rolname='dulu'" >/dev/null 2>&1)
+sudo -u postgres psql --command="SELECT 1 FROM pg_roles WHERE rolname='dulu'" >/dev/null 2>&1
+dulu_user_check=$?
 if [[ $dulu_user_check -ne 0 ]]; then
     echo "Creating postgres superuser..."
     sudo -u postgres psql --command="CREATE ROLE dulu CREATEDB LOGIN SUPERUSER PASSWORD 'dulu';"
