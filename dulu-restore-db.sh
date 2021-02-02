@@ -11,11 +11,18 @@ else
     exit 1
 fi
 
+# Ensure correct PWD.
+if [[ ! $PWD == '/home/dulu/dulu' ]]; then
+    cd '/home/dulu/dulu'
+fi
+
 name="dulu"
 if [[ $(echo $db_to_restore | awk -F'_' '{print $2}') == 'dev' ]]; then
     name="dulu_dev"
 fi
 
 if [[ $db_to_restore ]]; then
+    # Need to drop db first before restore to avoid errors.
+    rails db:drop
     zcat $db_to_restore | sudo -u dulu psql --dbname="$name" --username="dulu"
 fi
