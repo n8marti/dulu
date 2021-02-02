@@ -223,14 +223,16 @@ fi
 bundler_ver=$(grep -A1 'BUNDLED WITH' $DULU_HOME/dulu/Gemfile.lock | tail -n1 | tr -d ' ')
 gem list -i '^bundler' >/dev/null 2>&1
 bundler_status=$?
-if [[ ! $bundler_status ]]; then
+if [[ $bundler_status -ne 0 ]]; then
     echo "Installing bundler (v$bundler_ver)..."
     gem install bundler -v $bundler_ver
     rbenv rehash
 fi
 
 # Install the necessary gems.
-if [[ ! $(bundle check) ]]; then
+bundle check >/dev/null 2>&1
+bundle_check=$?
+if [[ $bundle_check -eq 0 ]]; then
     echo "Installing gems..."
     bundle install
     rbenv rehash
