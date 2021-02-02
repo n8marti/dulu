@@ -247,8 +247,8 @@ if [[ ! -e $DULU_HOME/dulu/config/secrets.yml ]]; then
     echo "Generating a secrets.yml file..."
 
     # Random Keys
-    KEY_DEV=$(./bin/rake secret)
-    KEY_TEST=$(./bin/rake secret)
+    KEY_DEV=$(rake secret)
+    KEY_TEST=$(rake secret)
 
     # Generate the file
     cat > $DULU_HOME/dulu/config/secrets.yml << MULTILINE
