@@ -29,5 +29,6 @@ if [[ $db_to_restore ]]; then
     # Need to drop and then create db first before restoring.
     rails db:drop
     rails db:create
-    zcat $db_to_restore | sudo -u dulu psql --dbname="$name" --username="dulu"
+    # Must be executed as "dulu" user; e.g. sudo --user dulu.
+    zcat $db_to_restore | psql --dbname="$name" --username="dulu"
 fi
