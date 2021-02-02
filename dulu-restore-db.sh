@@ -26,7 +26,8 @@ if [[ $(echo $db_to_restore | awk -F'_' '{print $2}') == 'dev' ]]; then
 fi
 
 if [[ $db_to_restore ]]; then
-    # Need to drop db first before restore to avoid errors.
+    # Need to drop and then create db first before restoring.
     rails db:drop
-    zcat $db_to_restore | sudo -u postgres psql --dbname="$name" --username="dulu"
+    rails db:create
+    zcat $db_to_restore | sudo -u dulu psql --dbname="$name" --username="dulu"
 fi
