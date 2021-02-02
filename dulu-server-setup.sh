@@ -183,7 +183,7 @@ fi
 
 # Must be in dulu directory for git and rbenv commands to work.
 cd $DULU_HOME/dulu
-echo "Now working in $PWD."
+echo "Now working in ${PWD}/"
 
 # Ensure that repo is up to date with upstream.
 upstream='https://github.com/silcam/dulu.git'
@@ -232,7 +232,7 @@ fi
 # Install the necessary gems.
 bundle check >/dev/null 2>&1
 bundle_check=$?
-if [[ $bundle_check -eq 0 ]]; then
+if [[ $bundle_check -ne 0 ]]; then
     echo "Installing gems..."
     bundle install
     rbenv rehash
@@ -279,15 +279,16 @@ end
 "
 omniauth_file="$DULU_HOME/dulu/config/initializers/omniauth.rb"
 if [[ ! -e $omniauth_file ]]; then
-    echo "You need to create"
-    echo "$omniauth_file with the following contents:"
+    echo "You need to create:"
+    echo "$omniauth_file"
+    echo "with the following contents:"
     echo "$contents"
     echo "Then re-run the script."
     exit 1
 fi
 
 # Ensure postgres superuser.
-if [[ ! $(sudo -u postgres psql --command="SELECT 1 FROM pg_roles WHERE rolname='dulu'" 2>/dev/null) ]]; then
+if [[ ! $(sudo -u postgres psql --command="SELECT 1 FROM pg_roles WHERE rolname='dulu'" >/dev/null 2>&1) ]]; then
     echo "Creating postgres superuser..."
     sudo -u postgres psql --command="CREATE ROLE dulu CREATEDB LOGIN SUPERUSER PASSWORD 'dulu';"
 fi
@@ -309,7 +310,6 @@ if [[ ! $db_check ]]; then
     rails db:schema:load
     # Seed the database with initial data.
     rails db:seed
-    echo -e "\t...done creating, loading, and seeding new database."
 fi
 
 # Start the server.
