@@ -314,4 +314,5 @@ fi
 
 # Start the server.
 echo "Setup complete. Start dev server with:"
-echo "\$ foreman start"
+echo "\$ cd dulu"
+echo "~/dulu\$ foreman start"
