@@ -40,13 +40,14 @@
     <%= image_tag 'dulu.png', alt: 'Dulu '%>
   </div>
   <div class="main">
-      <h1 class="welcome"><strong>Welcome to Dulu</strong></h1>
+      <h1 class="welcome"><strong>Welcome to Dulu CAR</strong></h1>
 
-      <p class="lead welcome">Dulu is a tool developed by SIL Cameroon for tracking and managing the many language development languages in Cameroon. To gain access, contact the Cameroon Branch Computer Services Department.</p>
+      <p class="lead welcome">Dulu is a tool for documenting progress in linguistic research, language development and translation activities in the Central African Republic. It was developed by SIL Cameroon and has been shared with SIL CAR.</p>
+      <p class="lead welcome">To gain access, contact SIL CAR's IT Administrator.</p>
 
     <% if @failed_login_email %>
         <p class="lead red">
-          Sorry, but no one is authorized to log in to Dulu with the address <%= @failed_login_email %>. Are you using the correct SIL email address?
+          Sorry, but the address <%= @failed_login_email %> is authorized to log in to Dulu CAR. Are you using the correct SIL email address?
         </p>
     <% end %>
 
@@ -62,7 +63,7 @@
   <div>
     <hr>
     <ul class="list-inline">
-      <li class="lead"><%= link_to 'SIL Cameroon', 'http://cameroon.sil.org' %></li>
+      <%# li class="lead" %><%# %= link_to 'SIL Cameroon', 'http://cameroon.sil.org' %><%# /li %>
       <li class="lead"><%= link_to 'SIL International', 'http://sil.org' %></li>
       <li class="lead"><%= link_to 'Wycliffe Global Alliance', 'http://wycliffe.net' %></li>
       <li class="lead"><%= link_to 'Ethnologue', 'http://ethnologue.com' %></li>
