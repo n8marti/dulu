@@ -42,15 +42,6 @@
   <div class="main">
       <h1 class="welcome"><strong>Welcome to Dulu CAR</strong></h1>
 
-      <p class="lead welcome">Dulu is a tool for documenting progress in linguistic research, language development and translation activities in the Central African Republic. It was developed by SIL Cameroon and has been shared with SIL CAR.</p>
-      <p class="lead welcome">To gain access, contact SIL CAR's IT Administrator.</p>
-
-    <% if @failed_login_email %>
-        <p class="lead red">
-          Sorry, but the address <%= @failed_login_email %> is authorized to log in to Dulu CAR. Are you using the correct SIL email address?
-        </p>
-    <% end %>
-
       <p class="welcome">
         <a  id='google-signin-link' href="/auth/google_oauth2">
           <%= image_tag 'btn_google_signin_light_normal_web@2x.png', class: 'img-normal', size: '287x69', alt: 'Sign in with Google' %>
@@ -59,14 +50,25 @@
         </a>
       </p>
 
+      <p class="lead welcome">Dulu is a tool for documenting progress in linguistic research, language development and translation activities in the Central African Republic.</p>
+      <p class="lead welcome">To gain access, contact SIL CAR's IT Administrator. Dulu was developed by SIL Cameroon and has been shared with SIL CAR, both working under <%= link_to 'SIL International', 'http://sil.org' %>.</p>
+
+    <% if @failed_login_email %>
+        <p class="lead red">
+          Sorry, but the address <%= @failed_login_email %> is authorized to log in to Dulu CAR. Are you using the correct SIL email address?
+        </p>
+    <% end %>
+
   </div>
+  <% if false %>
   <div>
     <hr>
     <ul class="list-inline">
-      <%# li class="lead" %><%# %= link_to 'SIL Cameroon', 'http://cameroon.sil.org' %><%# /li %>
+      <li class="lead"><%= link_to 'SIL Cameroon', 'http://cameroon.sil.org' %></li>
       <li class="lead"><%= link_to 'SIL International', 'http://sil.org' %></li>
       <li class="lead"><%= link_to 'Wycliffe Global Alliance', 'http://wycliffe.net' %></li>
       <li class="lead"><%= link_to 'Ethnologue', 'http://ethnologue.com' %></li>
     </ul>
   </div>
+  <% end %>
 </div>
