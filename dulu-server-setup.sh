@@ -15,6 +15,8 @@ DULU_USER=dulu
 DULU_HOME=/home/$DULU_USER
 RUBY_VER=2.5.0
 NODE_VER=v12
+PUBLIC_IP=192.168.6.244
+DOMAIN_NAME=''
 
 
 # This assumes Ubuntu 18.04 server as of 2021-01-18.
@@ -68,6 +70,14 @@ if [[ ! -e $yarn_repo ]]; then
     echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee $yarn_repo
 fi
 
+# Ensure passenger repo is added.
+passenger_repo=/etc/apt/sources.list.d/passenger.list
+if [[ ! -e $passenger_repo ]]; then
+    echo "Adding passenger repository..."
+    sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 561F9B9CAC40B2F7
+    echo "echo deb https://oss-binaries.phusionpassenger.com/apt/passenger bionic main" | sudo tee $passenger_repo
+fi
+
 # List APT package dependencies.
 deps=(
     autoconf
@@ -89,6 +99,10 @@ deps=(
     postgresql
     yarn
     zlib1g-dev
+    # still testing:
+    nginx
+    libnginx-mod-http-passenger
+    #nginx-extras
 )
 
 # Check to see if any APT deps are missing.
@@ -314,7 +328,39 @@ if [[ ! $db_check ]]; then
     rails db:seed
 fi
 
-# Start the server.
+# Make sure nginx uses rbenv Ruby instead of system Ruby?
+#   symlink to /usr/bin/ruby?
+#       sudo ln -s /usr/local/bin/ruby /usr/bin/ruby
+
+# Configure nginx.
+#   https://www.phusionpassenger.com/library/install/nginx/install/oss/bionic/
+#   https://www.digitalocean.com/community/tutorials/how-to-deploy-a-rails-app-with-passenger-and-nginx-on-ubuntu-14-04
+
+# Create an Nginx configuration file for dulu:
+server_name = $PUBLIC_IP
+if [[ $DOMAIN_NAME ]];
+    server_name = $DOMAIN_NAME
+fi
+dulu_avail=/etc/nginx/sites-available/dulu
+contents="
+server {
+    listen 8443 default_server;
+    server_name ${server_name};
+    passenger_enabled on;
+    #passenger_app_env development;
+    root $DULU_HOME/dulu/public;
+}
+"
+echo "$contents" | sudo tee "$dulu_avail"
+
+# Enable dulu site in nginx.
+sudo ln -s "$dulu_avail" /etc/nginx/sites-enabled/dulu
+
+# Restart nginx.
+sudo systemctl restart nginx.service
+
+
+# Try out the dev server.
 echo "Setup complete. Start dev server with:"
 echo "\$ cd dulu"
 echo "~/dulu\$ foreman start"
