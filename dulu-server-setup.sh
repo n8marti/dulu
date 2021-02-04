@@ -351,14 +351,22 @@ server {
     root $DULU_HOME/dulu/public;
 }
 "
-echo "$contents" | sudo tee "$dulu_avail"
+if [[ ! -e $dulu_avail ]]; then
+    echo "$contents" | sudo tee "$dulu_avail"
+fi
 
 # Enable dulu site in nginx.
-sudo ln -s "$dulu_avail" /etc/nginx/sites-enabled/dulu
+restart_ngnix=0
+dulu_enabled=/etc/nginx/sites-enabled/dulu
+if [[ ! -e $dulu_enabled ]]; then
+    sudo ln -s "$dulu_avail" "$dulu_enabled"
+    restart_nginx=1
+fi
 
 # Restart nginx.
-sudo systemctl restart nginx.service
-
+if [[ $restart_nginx -eq 1 ]]; then
+    sudo systemctl restart nginx.service
+fi
 
 # Try out the dev server.
 echo "Setup complete. Start dev server with:"
