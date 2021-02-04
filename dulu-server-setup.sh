@@ -348,7 +348,7 @@ server {
     listen 8443 default_server;
     #server_name ${server_name};
     passenger_enabled on;
-    passenger_ruby $DULU_HOME/.rbenv/shims/ruby
+    passenger_ruby $DULU_HOME/.rbenv/shims/ruby;
     #passenger_app_env development;
     root $DULU_HOME/dulu/public;
 }
