@@ -364,6 +364,12 @@ if [[ ! -e $dulu_enabled ]]; then
     restart_nginx=1
 fi
 
+# Disable default site on port 80.
+default_enabled=/etc/nginx/sites-enabled/default
+if [[ -e $default_enabled ]]; then
+    rm "$default_enabled"
+fi
+
 # Restart nginx.
 if [[ $restart_nginx -eq 1 ]]; then
     sudo systemctl restart nginx.service
