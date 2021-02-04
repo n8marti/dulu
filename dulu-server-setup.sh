@@ -243,7 +243,7 @@ if [[ $bundler_status -ne 0 ]]; then
     rbenv rehash
 fi
 
-# Install the necessary gems.
+# Ensure installation of necessary gems.
 bundle check >/dev/null 2>&1
 bundle_check=$?
 if [[ $bundle_check -ne 0 ]]; then
@@ -251,6 +251,10 @@ if [[ $bundle_check -ne 0 ]]; then
     bundle install
     rbenv rehash
 fi
+
+# Ensure installation of cap.
+echo "Ensuring installation of cap..."
+cap install
 
 # Run yarn install.
 echo "Ensuring installation of yarn..."
@@ -377,6 +381,13 @@ fi
 if [[ $restart_nginx -eq 1 ]]; then
     sudo systemctl restart nginx.service
 fi
+
+# Ensure non-tracked files are available.
+config_dir=
+secrets="$DULU_HOME/dulu/"
+omniauth=
+database=
+#if [[ ! -L ]]
 
 # Try out the dev server.
 echo "Setup complete. Start dev server with:"
