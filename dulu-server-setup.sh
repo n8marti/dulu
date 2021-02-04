@@ -106,7 +106,7 @@ deps=(
 )
 
 # Check to see if any APT deps are missing.
-echo "Checking that APT dependencies are met..."
+echo "Ensuring that APT dependencies are met..."
 deps_missing=0
 # nodejs is already installed by default, but the version is outdated.
 if [[ $(which node) ]]; then
@@ -337,9 +337,9 @@ fi
 #   https://www.digitalocean.com/community/tutorials/how-to-deploy-a-rails-app-with-passenger-and-nginx-on-ubuntu-14-04
 
 # Create an Nginx configuration file for dulu:
-server_name = $PUBLIC_IP
+server_name="$PUBLIC_IP"
 if [[ $DOMAIN_NAME ]];
-    server_name = $DOMAIN_NAME
+    server_name="$DOMAIN_NAME"
 fi
 dulu_avail=/etc/nginx/sites-available/dulu
 contents="
