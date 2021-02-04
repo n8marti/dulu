@@ -338,6 +338,7 @@ fi
 #   https://www.digitalocean.com/community/tutorials/how-to-deploy-a-rails-app-with-passenger-and-nginx-on-ubuntu-14-04
 
 # Create an Nginx configuration file for dulu:
+restart_ngnix=0
 server_name="$PUBLIC_IP"
 if [[ $DOMAIN_NAME ]]; then
     server_name="$DOMAIN_NAME"
@@ -355,10 +356,10 @@ server {
 "
 if [[ ! -e $dulu_avail ]]; then
     echo "$contents" | sudo tee "$dulu_avail"
+    restart_nginx=1
 fi
 
 # Enable dulu site in nginx.
-restart_ngnix=0
 dulu_enabled=/etc/nginx/sites-enabled/dulu
 if [[ ! -e $dulu_enabled ]]; then
     sudo ln -s "$dulu_avail" "$dulu_enabled"
@@ -369,6 +370,7 @@ fi
 default_enabled=/etc/nginx/sites-enabled/default
 if [[ -e $default_enabled ]]; then
     sudo rm "$default_enabled"
+    restart_ngnix=1
 fi
 
 # Restart nginx.
