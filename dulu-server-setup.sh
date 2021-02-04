@@ -334,6 +334,7 @@ fi
 
 # Configure nginx.
 #   https://www.phusionpassenger.com/library/install/nginx/install/oss/bionic/
+#   https://www.phusionpassenger.com/library/config/nginx/intro.html
 #   https://www.digitalocean.com/community/tutorials/how-to-deploy-a-rails-app-with-passenger-and-nginx-on-ubuntu-14-04
 
 # Create an Nginx configuration file for dulu:
@@ -345,7 +346,7 @@ dulu_avail=/etc/nginx/sites-available/dulu
 contents="
 server {
     listen 8443 default_server;
-    server_name ${server_name};
+    #server_name ${server_name};
     passenger_enabled on;
     #passenger_app_env development;
     root $DULU_HOME/dulu/public;
