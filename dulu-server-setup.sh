@@ -368,7 +368,7 @@ fi
 # Disable default site on port 80.
 default_enabled=/etc/nginx/sites-enabled/default
 if [[ -e $default_enabled ]]; then
-    rm "$default_enabled"
+    sudo rm "$default_enabled"
 fi
 
 # Restart nginx.
