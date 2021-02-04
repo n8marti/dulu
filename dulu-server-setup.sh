@@ -338,7 +338,7 @@ fi
 
 # Create an Nginx configuration file for dulu:
 server_name="$PUBLIC_IP"
-if [[ $DOMAIN_NAME ]];
+if [[ $DOMAIN_NAME ]]; then
     server_name="$DOMAIN_NAME"
 fi
 dulu_avail=/etc/nginx/sites-available/dulu
