@@ -13,10 +13,9 @@ fi
 SCRIPT_PARENT=$(dirname $(realpath $0))
 DULU_USER=dulu
 DULU_HOME=/home/$DULU_USER
+DULU_REPO="${DULU_HOME}/dulu"
 RUBY_VER=2.5.0
 NODE_VER=v12
-PUBLIC_IP=192.168.6.244
-DOMAIN_NAME=''
 
 
 # This assumes Ubuntu 18.04 server as of 2021-01-18.
@@ -102,6 +101,7 @@ deps=(
     # still testing:
     nginx
     libnginx-mod-http-passenger
+    #libcurl4-openssl-dev
     #nginx-extras
 )
 
@@ -134,7 +134,8 @@ if [[ $deps_missing -gt 0 ]]; then
 fi
 
 # Ensure postgresql server started.
-if [[ ! $(systemctl status postgresql.service --no-pager) ]]; then
+pg_status=$(systemctl status postgresql.service --no-pager)
+if [[ $pg_status -ne 0 ]]; then
     sudo systemctl enable --now postgresql.service
 fi
 
@@ -179,7 +180,7 @@ fi
 # Ensure installation of the bundler plugin.
 bundler_plugin_dir=$DULU_HOME/.rbenv/plugins/bundler
 if [[ ! -d $bundler_plugin_dir ]]; then
-    git clone https://github.com/carsomyr/rbenv-bundler.git $bundler_plugin_dir
+    git clone https://github.com/carsomyr/rbenv-bundler.git "$bundler_plugin_dir"
     if [[ $? -ne 0 ]]; then
         echo "Error: Failed to clone bundler repo. Check the connection and try again."
         exit 1
@@ -187,8 +188,8 @@ if [[ ! -d $bundler_plugin_dir ]]; then
 fi
 
 # Ensure the Dulu repo and cd into it.
-if [[ ! -d $DULU_HOME/dulu ]]; then
-    git clone https://github.com/n8marti/dulu.git $DULU_HOME/dulu
+if [[ ! -d $DULU_REPO ]]; then
+    git clone https://github.com/n8marti/dulu.git "$DULU_REPO"
     if [[ ! $? -eq 0 ]]; then
         echo "Error: Failed to clone Dulu repo. Check the connection and try again."
         exit 1
@@ -196,7 +197,7 @@ if [[ ! -d $DULU_HOME/dulu ]]; then
 fi
 
 # Must be in dulu directory for git and rbenv commands to work.
-cd $DULU_HOME/dulu
+cd $DULU_REPO
 echo "Now working in ${PWD}/"
 
 # Ensure that repo is up to date with upstream.
@@ -211,14 +212,14 @@ echo "Updating from upstream branch silcam/dulu..."
 git merge upstream/master
 
 # Create database.yml file from the sample.
-db_config=$DULU_HOME/dulu/config/database.yml
+db_config="${DULU_REPO}/config/database.yml"
 if [[ ! -e $db_config ]]; then
     echo "Creating database.yml from database_sample..."
-    cp $DULU_HOME/dulu/config/{database_sample.yml,database.yml}
+    cp ${DULU_REPO}/config/{database_sample.yml,database.yml}
 fi
 
 # Ensure installation of correct Ruby version.
-if [[ ! -d /home/dulu/.rbenv/versions/$RUBY_VER ]]; then
+if [[ ! -d $DULU_HOME/.rbenv/versions/$RUBY_VER ]]; then
     echo "Installing Ruby $RUBY_VER..."
     rbenv install $RUBY_VER
     rbenv rehash
@@ -234,7 +235,7 @@ fi
 
 # Ensure installation of bundler.
 #   Get bundler version.
-bundler_ver=$(grep -A1 'BUNDLED WITH' $DULU_HOME/dulu/Gemfile.lock | tail -n1 | tr -d ' ')
+bundler_ver=$(grep -A1 'BUNDLED WITH' ${DULU_REPO}/Gemfile.lock | tail -n1 | tr -d ' ')
 gem list -i '^bundler' >/dev/null 2>&1
 bundler_status=$?
 if [[ $bundler_status -ne 0 ]]; then
@@ -261,7 +262,7 @@ echo "Ensuring installation of yarn..."
 yarn --silent install
 
 # Ensure the secrets.yml file.
-if [[ ! -e $DULU_HOME/dulu/config/secrets.yml ]]; then
+if [[ ! -e ${DULU_REPO}/config/secrets.yml ]]; then
     echo "Generating a secrets.yml file..."
 
     # Random Keys
@@ -269,7 +270,7 @@ if [[ ! -e $DULU_HOME/dulu/config/secrets.yml ]]; then
     KEY_TEST=$(rake secret)
 
     # Generate the file
-    cat > $DULU_HOME/dulu/config/secrets.yml << MULTILINE
+    cat > "${DULU_REPO}/config/secrets.yml" << MULTILINE
 development:
   secret_key_base: ${KEY_DEV}
   gmail_username: 'dulu_sender@example.com'
@@ -295,7 +296,7 @@ Rails.application.config.middleware.use OmniAuth::Builder do
   }
 end
 "
-omniauth_file="$DULU_HOME/dulu/config/initializers/omniauth.rb"
+omniauth_file="${DULU_REPO}/config/initializers/omniauth.rb"
 if [[ ! -e $omniauth_file ]]; then
     echo "You need to create:"
     echo "$omniauth_file"
@@ -320,10 +321,10 @@ if [[ $1 == 'db-new' ]]; then
     rails db:drop
 fi
 
-# Ensure the database exists.
+# Ensure the databases exist.
 db_check=$(psql --list | grep dulu_dev 2>/dev/null)
 if [[ ! $db_check ]]; then
-    echo "Creating, loading, and seeding new database..."
+    echo "Creating, loading, and seeding new dev and test databases..."
     # Create databases dulu_dev and dulu_test. See database.yml for the username and password to use.
     rails db:create
     #Initialize the development database by loading the schema
@@ -331,15 +332,18 @@ if [[ ! $db_check ]]; then
     # Seed the database with initial data.
     rails db:seed
 fi
-
-# Make sure nginx uses rbenv Ruby instead of system Ruby?
-#   symlink to /usr/bin/ruby?
-#       sudo ln -s /usr/local/bin/ruby /usr/bin/ruby
+prod_db_check=$(psql --list | grep dulu | grep -v dulu_ 2>/dev/null)
+if [[ ! $prod_db_check ]]; then
+    echo "Need to create initial production database \"dulu\", then"
+    echo "restore from .gz backup like this:"
+    echo "\$ psql --user=postgres -c \"CREATE DATABASE dulu OWNER dulu;\""
+    echo "\$ zcat [backup.gz] | psql --dbname=\"dulu\" --username=\"dulu\""
+fi
 
 # Configure nginx.
+#   https://www.phusionpassenger.com/library/walkthroughs/deploy/ruby/digital_ocean/nginx/oss/bionic/deploy_app.html
 #   https://www.phusionpassenger.com/library/install/nginx/install/oss/bionic/
 #   https://www.phusionpassenger.com/library/config/nginx/intro.html
-#   https://www.digitalocean.com/community/tutorials/how-to-deploy-a-rails-app-with-passenger-and-nginx-on-ubuntu-14-04
 
 # Create an Nginx configuration file for dulu:
 restart_ngnix=0
@@ -355,7 +359,7 @@ server {
     passenger_enabled on;
     passenger_ruby $DULU_HOME/.rbenv/shims/ruby;
     #passenger_app_env development;
-    root $DULU_HOME/dulu/public;
+    root ${DULU_REPO}/public;
 }
 "
 if [[ ! -e $dulu_avail ]]; then
@@ -384,7 +388,7 @@ fi
 
 # Ensure non-tracked files are available.
 config_dir=
-secrets="$DULU_HOME/dulu/"
+secrets="$DULU_REPO"
 omniauth=
 database=
 #if [[ ! -L ]]
